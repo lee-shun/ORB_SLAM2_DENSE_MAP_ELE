@@ -42,8 +42,9 @@ PointCloudMapping::PointCloudMapping(double resolution_, double meank_,
   voxel.setLeafSize(resolution, resolution, resolution);
   //  全局点云地图
   globalMap = boost::make_shared<PointCloud>();
-  //  绑定并启动显示线程
-  viewerThread = make_shared<thread>(bind(&PointCloudMapping::Viewer, this));
+
+  // TODO: 绑定并启动显示线程, 使用Viewer()函数
+
   //  标记参数
   loopbusy = false;
   cloudbusy = false;
@@ -100,19 +101,8 @@ PointCloudMapping::GeneratePointCloud(KeyFrame *kf, cv::Mat &color,
   PointCloud::Ptr tmp(new PointCloud());
   for (int m = 0; m < depth.rows; m += 3) {
     for (int n = 0; n < depth.cols; n += 3) {
-      float d = depth.ptr<float>(m)[n];
-      //  有效深度值范围是0.01-5m
-      if (d < 0.01 || d > 5) continue;
-      PointT p;
-      p.z = d;
-      p.x = (n - kf->cx) * p.z / kf->fx;
-      p.y = (m - kf->cy) * p.z / kf->fy;
-
-      p.b = color.ptr<uchar>(m)[n * 3];
-      p.g = color.ptr<uchar>(m)[n * 3 + 1];
-      p.r = color.ptr<uchar>(m)[n * 3 + 2];
-
-      tmp->points.push_back(p);
+      // TODO: 反投影生成点云
+      // 提示： 注意点云有效范围
     }
   }
 
@@ -171,25 +161,21 @@ void PointCloudMapping::Viewer() {
 
         for (size_t i = lastKeyframeSize; i < N; i++) {
           PointCloud::Ptr p(new PointCloud);
-          // 将每一个关键帧中的点云通过刚体变换变换到世界坐标系下；
-          pcl::transformPointCloud(*(pointcloud[i].pcE), *p,
-                                   pointcloud[i].T.inverse().matrix());
+          // TODO: 将每一个关键帧中的点云通过刚体变换变换到世界坐标系下；
+          // 提示：pcl::transformPointCloud();
 
           //  将变换后的点云加入到全局地图中；
           *globalMap += *p;
         }
       }
 
+      PointCloud::Ptr tmp(new PointCloud);
       PointCloud::Ptr tmp1(new PointCloud);
 
-      // 全局点云作为输入，通过统计滤波器
-      statistical_filter.setInputCloud(globalMap);
-      statistical_filter.filter(*tmp1);
+      // TODO: 全局点云作为输入，通过统计滤波器
 
-      // 统计滤波 的输出作为体素滤波器的输入，通过滤波的点输出到全局地图中；
-      PointCloud::Ptr tmp(new PointCloud);
-      voxel.setInputCloud(tmp1);
-      voxel.filter(*tmp);
+      // TODO:
+      // 统计滤波的输出作为体素滤波器的输入，通过滤波的点输出到全局地图中；
 
       globalMap->swap(*tmp);
       viewer.showCloud(globalMap);
@@ -231,33 +217,21 @@ void PointCloudMapping::UpdateCloud(vector<KeyFrame *> all_kfs) {
         for (int i = 0; i < all_kfs.size(); i++) {
           //  pointcloud存储的是每个关键帧的点云、位姿、id信息
           for (int j = 0; j < pointcloud.size(); j++) {
-            //  找到具有相同的id的关键帧对应的点云，用GBA后的位姿来重新更新点云
-            if (pointcloud[j].pcID == all_kfs[i]->mnFrameId) {
-              //  这里的位姿是Tcw
-              Eigen::Isometry3d T =
-                  ORB_SLAM2::Converter::toSE3Quat(all_kfs[i]->GetPose());
-              PointCloud::Ptr cloud(new PointCloud);
-              //  Twc * Pc,将原来点云*pointcloud[j].pcE
-              //  转换到世界坐标系下变成*cloud
-              pcl::transformPointCloud(*pointcloud[j].pcE, *cloud,
-                                       T.inverse().matrix());
-              *tmp1 += *cloud;
-
-              continue;
-            }
+            // TODO:
+            // 找到具有相同的id的关键帧对应的点云，用GBA后的位姿来重新更新点云
           }
         }
       }
 
       cout << "finish adjusting all the point cloud!" << endl;
-      //  点云比较稠密，体素滤波来降采样
+
+      // TODO: 点云比较稠密，体素滤波来降采样
+      // 提示： tmp1->体素滤波-> tmp2
       PointCloud::Ptr tmp2(new PointCloud());  //  tmp2存储滤波后的点云
-      voxel.setInputCloud(tmp1);
-      voxel.filter(*tmp2);
 
       {
         unique_lock<mutex> lck(globalMapMutex);
-        globalMap->swap(*tmp2);  //  替换全局点云
+        // TODO: 替换全局点云
       }
 
       {

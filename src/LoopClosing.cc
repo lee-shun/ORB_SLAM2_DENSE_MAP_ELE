@@ -713,10 +713,11 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF) {
 
       mpLocalMapper->Release();
 
-      // 全局BA后，更新点云信息
       loopcount++;
-      vector<KeyFrame *> KFafterBA = mpMap->GetAllKeyFrames();
-      mpPointCloudMapping->UpdateCloud(KFafterBA);
+
+      // TODO: 全局BA后，更新点云信息
+      // 提示：mpPointCloudMapping->UpdateCloud();
+
       cout << "Map updated!" << endl;
     }
 

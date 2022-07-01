@@ -1378,9 +1378,8 @@ void Tracking::CreateNewKeyFrame() {
 
   mpLocalMapper->SetNotStop(false);
 
-  // 把新关键帧转换为点云插入到全局点云里
-  mpPointCloudMapping->InsertKeyFrame(pKF, this->mImRGB, this->mImDepth,
-                                      pKF->mnFrameId);
+  // TODO: 插入点云显示队列
+  // 提示：mpPointCloudMapping->InsertKeyFrame();
 
   mnLastKeyFrameId = mCurrentFrame.mnId;
   mpLastKeyFrame = pKF;

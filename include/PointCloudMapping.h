@@ -65,7 +65,7 @@ class PointCloudMapping {
   void Shutdown();
 
   /**
-   * @brief 点云显示线程
+   * @brief 点云显示
    */
   void Viewer();
 
