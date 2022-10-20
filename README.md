@@ -1,5 +1,7 @@
 # `RGB-D` camera dense mapping based on `ORB_SLAM2`
 
+[chinese version](./README_CN.md)
+
 ## Preparation before starting
 
 ### Confirm the build environment
